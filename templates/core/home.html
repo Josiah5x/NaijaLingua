@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}
+NaijaLingua | Learn Nigerian Languages Online
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+
+            <div class="col-lg-6">
+
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    DISCOVER THE BEAUTY OF NIGERIAN LANGUAGES
+                </div>
+
+                <h1 class="hero-title">
+                    Speak our languages.
+                    <span>Connect with our culture.</span>
+                </h1>
+
+                <p class="hero-description">
+                    Learn Yoruba, Igbo, Hausa and more through
+                    interactive lessons, native-speaker audio,
+                    fun quizzes and real-life conversations.
+                </p>
+
+                <div class="hero-actions">
+                    <a href="#languages" class="btn btn-brand btn-lg">
+                        Start Learning
+                        <span aria-hidden="true">&rarr;</span>
+                    </a>
+
+                    <a href="#how-it-works"
+                       class="btn btn-outline-brand btn-lg">
+                        Explore the Platform
+                    </a>
+                </div>
+
+                <div class="hero-trust">
+                    <div class="trust-avatars" aria-hidden="true">
+                        <span>Y</span>
+                        <span>I</span>
+                        <span>H</span>
+                    </div>
+
+                    <div>
+                        <strong>One platform. Many cultures.</strong>
+                        <p>Start with the language you love.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="hero-visual">
+
+                    <div class="visual-decoration decoration-one"></div>
+                    <div class="visual-decoration decoration-two"></div>
+
+                    <div class="learning-card">
+
+                        <div class="learning-card-top">
+                            <div>
+                                <span class="small-label">
+                                    YOUR FIRST LESSON
+                                </span>
+                                <h5>Everyday Greetings</h5>
+                            </div>
+
+                            <span class="lesson-icon">♫</span>
+                        </div>
+
+                        <div class="language-example">
+                            <span class="example-language">YORUBA</span>
+
+                            <h2>Ẹ káàárọ̀</h2>
+
+                            <p>Good morning</p>
+
+                            <div class="pronunciation">
+                                <span>eh-kah-ah-roh</span>
+                                <span class="sound-icon"
+                                      aria-hidden="true">♫</span>
+                            </div>
+                        </div>
+
+                        <div class="learning-progress">
+                            <div class="progress-info">
+                                <span>YOUR LEARNING JOURNEY</span>
+                                <span>Step 1 of 5</span>
+                            </div>
+
+                            <div class="progress-track">
+                                <div class="progress-fill"></div>
+                            </div>
+                        </div>
+
+                        <div class="learning-tip">
+                            <span class="tip-icon">✦</span>
+                            <div>
+                                <strong>Learn by doing</strong>
+                                <p>Practice words, sounds and meanings.</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="floating-note note-top">
+                        <span class="note-icon">✦</span>
+                        <div>
+                            <strong>Small steps</strong>
+                            <p>Real progress</p>
+                        </div>
+                    </div>
+
+                    <div class="floating-note note-bottom">
+                        <span class="note-icon">♫</span>
+                        <div>
+                            <strong>Listen & learn</strong>
+                            <p>Discover pronunciation</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- LANGUAGE SECTION -->
+<section class="languages-section section-padding" id="languages">
+    <div class="container">
+
+        <div class="section-heading text-center">
+            <span class="section-eyebrow">CHOOSE YOUR LANGUAGE</span>
+
+            <h2>
+                Your journey starts with
+                <span>one language.</span>
+            </h2>
+
+            <p>
+                Whether you're reconnecting with your roots or
+                discovering something new, start here.
+            </p>
+        </div>
+
+        <div class="row g-4 mt-3">
+
+            {% for language in languages %}
+
+            <div class="col-md-6 col-lg-4">
+
+                <article class="language-card">
+
+                    <div class="language-card-image">
+
+                        {% if language.image %}
+                            <img src="{{ language.image.url }}"
+                                 alt="{{ language.name }} language">
+                        {% else %}
+                            <div class="language-placeholder">
+                                <span>
+                                    {{ language.native_name|default:language.name|slice:":1" }}
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        <span class="language-tag">
+                            Beginner friendly
+                        </span>
+
+                    </div>
+
+                    <div class="language-card-body">
+
+                        <div class="language-heading">
+                            <div>
+                                <h3>{{ language.name }}</h3>
+                                <p>{{ language.native_name }}</p>
+                            </div>
+
+                            <span class="language-arrow"
+                                  aria-hidden="true">&rarr;</span>
+                        </div>
+
+                        <p class="language-description">
+                            {{ language.description }}
+                        </p>
+
+                        <a href="#how-it-works"
+                           class="language-link">
+                            Explore learning
+                            <span aria-hidden="true">&rarr;</span>
+                        </a>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+            {% empty %}
+
+            <div class="col-12">
+                <div class="empty-languages">
+                    <h3>Your language journey begins here.</h3>
+
+                    <p>
+                        Our first language courses are being prepared.
+                        Add your launch languages through the Django
+                        administration panel to display them here.
+                    </p>
+                </div>
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- FEATURES SECTION -->
+<section class="features-section section-padding" id="features">
+    <div class="container">
+
+        <div class="section-heading text-center">
+            <span class="section-eyebrow">LEARN YOUR WAY</span>
+
+            <h2>
+                More than words.
+                <span>Real understanding.</span>
+            </h2>
+
+            <p>
+                Build confidence through practical lessons
+                designed to make learning engaging.
+            </p>
+        </div>
+
+        <div class="row g-4 mt-3">
+
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon icon-purple">♫</div>
+                    <h3>Audio Lessons</h3>
+                    <p>
+                        Listen to native-speaker recordings and
+                        practise pronunciation at your own pace.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon icon-yellow">✓</div>
+                    <h3>Interactive Quizzes</h3>
+                    <p>
+                        Test your knowledge with exercises,
+                        vocabulary challenges and listening tasks.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon icon-green">↗</div>
+                    <h3>Track Your Progress</h3>
+                    <p>
+                        Follow your completed lessons, earn points
+                        and celebrate your learning milestones.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon icon-orange">◎</div>
+                    <h3>Explore Culture</h3>
+                    <p>
+                        Discover everyday expressions, traditions
+                        and the cultural context behind the words.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- HOW IT WORKS -->
+<section class="how-section section-padding" id="how-it-works">
+    <div class="container">
+
+        <div class="section-heading text-center">
+            <span class="section-eyebrow">SIMPLE TO GET STARTED</span>
+
+            <h2>
+                Three steps to
+                <span>start speaking.</span>
+            </h2>
+
+            <p>
+                A simple learning journey for beginners
+                and returning learners.
+            </p>
+        </div>
+
+        <div class="row g-4 mt-3">
+
+            <div class="col-md-4">
+                <div class="step-card">
+                    <span class="step-number">01</span>
+                    <h3>Choose a language</h3>
+                    <p>
+                        Pick Yoruba, Igbo or Hausa and begin
+                        with lessons suited to your level.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="step-card">
+                    <span class="step-number">02</span>
+                    <h3>Learn and practise</h3>
+                    <p>
+                        Study vocabulary, listen to audio,
+                        practise expressions and take quizzes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="step-card">
+                    <span class="step-number">03</span>
+                    <h3>Track your progress</h3>
+                    <p>
+                        Complete lessons, earn achievements
+                        and continue towards your learning goals.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- CTA SECTION -->
+<section class="cta-section">
+    <div class="container">
+
+        <div class="cta-content">
+
+            <span class="section-eyebrow">YOUR JOURNEY STARTS TODAY</span>
+
+            <h2>
+                Keep your language alive.
+                <br>
+                Share it with the world.
+            </h2>
+
+            <p>
+                Learn new words, discover new expressions
+                and connect with Nigerian culture.
+            </p>
+
+            <a href="#languages" class="btn btn-light btn-lg">
+                Explore Languages
+                <span aria-hidden="true">&rarr;</span>
+            </a>
+
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
