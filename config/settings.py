@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # NaijaLingua applications
     'core',
     'languages',
+    "courses",
 ]
 
 MIDDLEWARE = [
