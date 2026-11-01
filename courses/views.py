@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Prefetch
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from .models import Course, Lesson, Vocabulary, LessonProgress
 from .forms import CourseForm, LessonForm, VocabularyForm
@@ -700,6 +700,180 @@ def instructor_courses(request):
         {"courses": courses}
     )
 
+
+
+
+
+@login_required
+def course_progress(request):
+    courses = Course.objects.filter(
+        is_published=False
+    ).annotate(
+        total_lessons=Count(
+            "lessons",
+            filter=Q(lessons__is_published=False),
+            distinct=True
+        ),
+        completed_lessons=Count(
+            "lessons__learner_progress",
+            filter=Q(
+                lessons__is_published=False,
+                lessons__learner_progress__learner=request.user,
+                lessons__learner_progress__is_completed=True
+            ),
+            distinct=True
+        )
+    ).order_by("title")
+
+    # Exclude courses that have no published lessons.
+    courses = courses.filter(total_lessons__gt=0)
+
+    for course in courses:
+        course.progress_percentage = round(
+            course.completed_lessons / course.total_lessons * 100
+        )
+
+    context = {
+        "courses": courses,
+        "total_courses": courses.count(),
+        "total_completed": sum(
+            course.completed_lessons for course in courses
+        ),
+        "total_lessons": sum(
+            course.total_lessons for course in courses
+        ),
+    }
+
+    return render(
+        request,
+        "courses/learner/course_progress.html",
+        context
+    )
+
+
+
+
+from django.views.decorators.http import require_POST
+from .models import Quiz, Lesson
+
+@login_required
+@content_manager_required
+def instructor_quizzes(request):
+    if request.user.is_superuser or request.user.is_staff:
+        quizzes = Quiz.objects.select_related(
+            "lesson__course"
+        ).order_by("-created_at")
+    else:
+        quizzes = Quiz.objects.filter(
+            lesson__course__instructor=request.user
+        ).select_related(
+            "lesson__course"
+        ).order_by("-created_at")
+
+    return render(
+        request,
+        "courses/instructor/quizzes.html",
+        {"quizzes": quizzes}
+    )
+
+
+@login_required
+@content_manager_required
+def quiz_create(request, lesson_id):
+    lesson = get_instructor_lesson(request.user, lesson_id)
+
+    if Quiz.objects.filter(lesson=lesson).exists():
+        messages.warning(request, "This lesson already has a quiz.")
+        return redirect("courses:quiz_update",
+                        quiz_id=lesson.quiz.pk)
+
+    if request.method == "POST":
+        form = QuizForm(request.POST)
+
+        if form.is_valid():
+            quiz = form.save(commit=False)
+            quiz.lesson = lesson
+            quiz.save()
+
+            messages.success(request, "Quiz created successfully.")
+            return redirect(
+                "courses:quiz_update",
+                quiz_id=quiz.pk
+            )
+    else:
+        form = QuizForm()
+
+    return render(request, "courses/instructor/quiz_form.html", {
+        "form": form,
+        "lesson": lesson,
+        "page_title": "Create Quiz",
+    })
+
+
+@login_required
+@content_manager_required
+def quiz_update(request, quiz_id):
+    quiz = get_instructor_quiz(request.user, quiz_id)
+
+    if request.method == "POST":
+        form = QuizForm(request.POST, instance=quiz)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Quiz updated successfully.")
+            return redirect("courses:quiz_update", quiz_id=quiz.pk)
+    else:
+        form = QuizForm(instance=quiz)
+
+    return render(request, "courses/instructor/quiz_form.html", {
+        "form": form,
+        "quiz": quiz,
+        "lesson": quiz.lesson,
+        "page_title": "Edit Quiz",
+    })
+
+
+@login_required
+@content_manager_required
+@require_POST
+def quiz_delete(request, quiz_id):
+    quiz = get_instructor_quiz(request.user, quiz_id)
+    quiz.delete()
+
+    messages.success(request, "Quiz deleted successfully.")
+    return redirect("courses:instructor_quizzes")
+
+
+def get_instructor_lesson(user, lesson_id):
+    lesson = get_object_or_404(
+        Lesson.objects.select_related("course"),
+        pk=lesson_id
+    )
+
+    if user.is_superuser or user.is_staff:
+        return lesson
+
+    if lesson.course.instructor_id != user.id:
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied
+
+    return lesson
+
+
+def get_instructor_quiz(user, quiz_id):
+    quiz = get_object_or_404(
+        Quiz.objects.select_related("lesson__course"),
+        pk=quiz_id
+    )
+
+    if user.is_superuser or user.is_staff:
+        return quiz
+
+    if quiz.lesson.course.instructor_id != user.id:
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied
+
+    return quiz
 
 
 

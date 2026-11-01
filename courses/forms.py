@@ -138,3 +138,99 @@ class VocabularyForm(forms.ModelForm):
 
 
 
+
+
+from django import forms
+from .models import Quiz, Question, AnswerOption
+
+
+class QuizForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        fields = [
+            "title",
+            "description",
+            "pass_mark",
+            "is_published",
+        ]
+
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter quiz title",
+            }),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Describe this quiz",
+            }),
+            "pass_mark": forms.NumberInput(attrs={
+                "class": "form-control",
+                "min": 0,
+                "max": 100,
+            }),
+            "is_published": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+        }
+
+    def clean_pass_mark(self):
+        pass_mark = self.cleaned_data["pass_mark"]
+
+        if not 0 <= pass_mark <= 100:
+            raise forms.ValidationError(
+                "Pass mark must be between 0 and 100."
+            )
+
+        return pass_mark
+
+
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = [
+            "question_text",
+            "explanation",
+            "points",
+            "order",
+        ]
+
+        widgets = {
+            "question_text": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Enter your question",
+            }),
+            "explanation": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 2,
+                "placeholder": "Explain the correct answer",
+            }),
+            "points": forms.NumberInput(attrs={
+                "class": "form-control",
+                "min": 1,
+            }),
+            "order": forms.NumberInput(attrs={
+                "class": "form-control",
+                "min": 1,
+            }),
+        }
+
+
+class AnswerOptionForm(forms.ModelForm):
+    class Meta:
+        model = AnswerOption
+        fields = [
+            "option_text",
+            "is_correct",
+        ]
+
+        widgets = {
+            "option_text": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter answer option",
+            }),
+            "is_correct": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+        }

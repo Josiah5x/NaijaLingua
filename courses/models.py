@@ -206,5 +206,74 @@ class LessonProgress(models.Model):
         return f"{self.learner} - {self.lesson.title}"
 
 
+class Quiz(models.Model):
+    lesson = models.OneToOneField(
+        "courses.Lesson",
+        on_delete=models.CASCADE,
+        related_name="quiz"
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    pass_mark = models.PositiveIntegerField(default=50)
+    is_published = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.lesson.title} - Quiz"
+
+
+class Question(models.Model):
+    quiz = models.ForeignKey(
+        Quiz,
+        on_delete=models.CASCADE,
+        related_name="questions"
+    )
+    question_text = models.TextField()
+    explanation = models.TextField(blank=True)
+    points = models.PositiveIntegerField(default=1)
+    order = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.question_text[:80]
+
+
+class AnswerOption(models.Model):
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name="options"
+    )
+    option_text = models.CharField(max_length=255)
+    is_correct = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.option_text
+
+
+class QuizAttempt(models.Model):
+    learner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="quiz_attempts"
+    )
+    quiz = models.ForeignKey(
+        Quiz,
+        on_delete=models.CASCADE,
+        related_name="attempts"
+    )
+    score = models.PositiveIntegerField(default=0)
+    total_points = models.PositiveIntegerField(default=0)
+    percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0
+    )
+    passed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.learner} - {self.quiz.title}"
 
