@@ -18,32 +18,26 @@ class CourseForm(forms.ModelForm):
         ]
 
         widgets = {
-            "language": forms.Select(attrs={
-                "class": "form-select",
-            }),
+            "language": forms.Select(attrs={"class": "form-select"}),
             "title": forms.TextInput(attrs={
                 "class": "form-control",
-                "placeholder": "e.g. Complete Yoruba for Beginners",
+                "placeholder": "Enter course title"
             }),
             "description": forms.Textarea(attrs={
                 "class": "form-control",
-                "rows": 4,
-                "placeholder": "Describe what learners will achieve...",
+                "rows": 4
             }),
-            "level": forms.Select(attrs={
-                "class": "form-select",
-            }),
+            "level": forms.Select(attrs={"class": "form-select"}),
             "thumbnail": forms.ClearableFileInput(attrs={
-                "class": "form-control",
+                "class": "form-control"
             }),
             "is_premium": forms.CheckboxInput(attrs={
-                "class": "form-check-input",
+                "class": "form-check-input"
             }),
             "is_published": forms.CheckboxInput(attrs={
-                "class": "form-check-input",
+                "class": "form-check-input"
             }),
         }
-
 
 
 class LessonForm(forms.ModelForm):
@@ -141,3 +135,6 @@ class VocabularyForm(forms.ModelForm):
                 "class": "form-control",
             }),
         }
+
+
+

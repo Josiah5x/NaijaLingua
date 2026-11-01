@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard | NaijaLingua{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+    <div class="container">
+
+        <div class="dashboard-welcome">
+            <div>
+                <span class="section-eyebrow">
+                    YOUR LEARNING SPACE
+                </span>
+
+                <h1>
+                    Welcome back,
+                    <span>
+                        {{ request.user.first_name|default:request.user.username }}
+                    </span>!
+                </h1>
+
+                <p>
+                    Ready to learn something new today?
+                </p>
+            </div>
+
+            <div class="dashboard-avatar">
+                {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="dashboard-stats">
+
+            <div class="stat-card">
+                <div class="stat-icon stat-purple">◎</div>
+                <div>
+                    <span>Learning Language</span>
+
+                    <h3>
+                        {% if profile.preferred_language %}
+                            {{ profile.preferred_language.name }}
+                        {% else %}
+                            Not selected
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-green">✓</div>
+                <div>
+                    <span>Completed Lessons</span>
+                    <h3>0</h3>
+                    <small>Your journey starts here</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-yellow">★</div>
+                <div>
+                    <span>Learning Points</span>
+                    <h3>0</h3>
+                    <small>Earn points as you learn</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="dashboard-section-heading">
+            <div>
+                <h2>Choose your learning path</h2>
+                <p>Explore a language and discover its courses.</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            {% for language in languages %}
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="dashboard-language-card">
+
+                        <div class="dashboard-language-top">
+                            <div class="language-mini-icon">
+                                {{ language.native_name|default:language.name|slice:":1" }}
+                            </div>
+
+                            <span class="course-level">
+                                Beginner
+                            </span>
+                        </div>
+
+                        <h3>{{ language.name }}</h3>
+
+                        <p class="native-name">
+                            {{ language.native_name }}
+                        </p>
+
+                        <p class="dashboard-language-description">
+                            {{ language.description }}
+                        </p>
+
+                        {% if profile.preferred_language_id == language.id %}
+                            <span class="selected-language">
+                                ✓ Your selected language
+                            </span>
+                        {% endif %}
+
+                        <a href="{% url 'core:home' %}#languages"
+                           class="btn btn-brand w-100">
+                            Explore Language
+                            <span aria-hidden="true">&rarr;</span>
+                        </a>
+
+                    </div>
+                </div>
+
+            {% empty %}
+
+                <div class="col-12">
+                    <div class="empty-languages">
+                        <h3>Languages are coming soon.</h3>
+                        <p>
+                            Check back soon to begin your learning journey.
+                        </p>
+                    </div>
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        <div class="dashboard-tip">
+            <div class="tip-icon">✦</div>
+
+            <div>
+                <h3>Your next step</h3>
+                <p>
+                    Choose a language and start with everyday greetings.
+                    Soon, your dashboard will track your lessons,
+                    quiz results and learning streaks.
+                </p>
+            </div>
+        </div>
+
+        <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+
+            <button type="submit" class="dashboard-logout">
+                Log out
+            </button>
+        </form>
+
+    </div>
+</section>
+
+{% endblock %}

@@ -3,8 +3,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Prefetch
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Count
 
-from .models import Course, Lesson, Vocabulary
+from .models import Course, Lesson, Vocabulary, LessonProgress
 from .forms import CourseForm, LessonForm, VocabularyForm
 from django import forms
 
@@ -37,11 +39,12 @@ content_manager_required = user_passes_test(
 def course_list(request):
 
     courses = Course.objects.filter(
-        is_published=True
+        # is_published=True
     ).select_related("language")
+    lesson_count = Course.objects.count()
 
     languages = Course.objects.filter(
-        is_published=True
+        # is_published=True
     ).values(
         "language__name",
         "language__slug"
@@ -56,6 +59,7 @@ def course_list(request):
 
     context = {
         "courses": courses,
+        "lesson_count":lesson_count,
         "languages": languages,
     }
 
@@ -75,11 +79,11 @@ def course_detail(request, slug):
     course = get_object_or_404(
         Course.objects.select_related("language"),
         slug=slug,
-        is_published=True
+        # is_published=True
     )
 
     lessons = course.lessons.filter(
-        is_published=True
+        # is_published=True
     )
 
     context = {
@@ -104,25 +108,25 @@ def lesson_detail(request, course_slug, lesson_slug):
     course = get_object_or_404(
         Course,
         slug=course_slug,
-        is_published=True
+        # is_published=True
     )
 
     lesson = get_object_or_404(
         Lesson,
         course=course,
         slug=lesson_slug,
-        is_published=True
+        # is_published=True
     )
 
     vocabulary = lesson.vocabulary.all()
 
     next_lesson = course.lessons.filter(
-        is_published=True,
+        # is_published=True,
         lesson_number__gt=lesson.lesson_number
     ).order_by("lesson_number").first()
 
     previous_lesson = course.lessons.filter(
-        is_published=True,
+        # is_published=True,
         lesson_number__lt=lesson.lesson_number
     ).order_by("-lesson_number").first()
 
@@ -148,24 +152,19 @@ def lesson_detail(request, course_slug, lesson_slug):
 def course_create(request):
 
     if request.method == "POST":
-        form = CourseForm(
-            request.POST,
-            request.FILES
-        )
+        form = CourseForm(request.POST, request.FILES)
 
         if form.is_valid():
-            course = form.save()
+            course = form.save(commit=False)
+            course.instructor = request.user
+            course.save()
 
-            messages.success(
-                request,
-                "Course created successfully."
-            )
+            messages.success(request, "Course created successfully.")
 
             return redirect(
                 "courses:manage_lessons",
                 slug=course.slug
             )
-
     else:
         form = CourseForm()
 
@@ -184,10 +183,11 @@ def course_create(request):
 @content_manager_required
 def course_update(request, slug):
 
-    course = get_object_or_404(
-        Course,
-        slug=slug
-    )
+    course = get_object_or_404(Course, slug=slug)
+
+    if not request.user.is_superuser and not request.user.is_staff:
+        if course.instructor_id != request.user.id:
+            return redirect("courses:instructor_dashboard")
 
     if request.method == "POST":
         form = CourseForm(
@@ -198,29 +198,16 @@ def course_update(request, slug):
 
         if form.is_valid():
             form.save()
-
-            messages.success(
-                request,
-                "Course updated successfully."
-            )
-
-            return redirect(
-                "courses:course_update",
-                slug=course.slug
-            )
-
+            messages.success(request, "Course updated successfully.")
+            return redirect("courses:manage_lessons", slug=course.slug)
     else:
         form = CourseForm(instance=course)
 
     return render(
         request,
         "courses/course_form.html",
-        {
-            "form": form,
-            "course": course,
-        }
+        {"form": form, "course": course}
     )
-
 
 # -----------------------------------------
 # DELETE COURSE
@@ -327,6 +314,106 @@ def lesson_create(request, course_slug):
             "course": course,
         }
     )
+
+# -----------------------------------------
+# LESSON DETAILS
+# -----------------------------------------
+
+@login_required
+def lesson_detail(request, course_slug, lesson_slug):
+
+    course = get_object_or_404(
+        Course,
+        slug=course_slug,
+        # is_published=True
+    )
+
+    lesson = get_object_or_404(
+        Lesson,
+        course=course,
+        slug=lesson_slug,
+        # is_published=True
+    )
+
+    # Get all published lessons in order
+    lessons = course.lessons.filter(
+        # is_published=True
+    ).order_by("lesson_number", "id")
+
+    # Previous lesson
+    previous_lesson = lessons.filter(
+        lesson_number__lt=lesson.lesson_number
+    ).order_by("-lesson_number", "-id").first()
+
+    # Next lesson
+    next_lesson = lessons.filter(
+        lesson_number__gt=lesson.lesson_number
+    ).order_by("lesson_number", "id").first()
+
+    # Vocabulary
+    vocabulary = lesson.vocabulary.all()
+
+    # Learner progress
+    progress, created = LessonProgress.objects.get_or_create(
+        learner=request.user,
+        lesson=lesson
+    )
+
+    context = {
+        "course": course,
+        "lesson": lesson,
+        "lessons": lessons,
+        "vocabulary": vocabulary,
+        "previous_lesson": previous_lesson,
+        "next_lesson": next_lesson,
+        "progress": progress,
+    }
+
+    return render(
+        request,
+        "courses/lesson_detail.html",
+        context
+    )
+
+# -----------------------------------------
+# MARK LESSON COMPLETE
+# -----------------------------------------
+
+
+@login_required
+def mark_lesson_complete(request, course_slug, lesson_slug):
+    if request.method != "POST":
+        return redirect(
+            "courses:lesson",
+            course_slug=course_slug,
+            lesson_slug=lesson_slug
+        )
+
+    lesson = get_object_or_404(
+        Lesson,
+        course__slug=course_slug,
+        course__is_published=True,
+        slug=lesson_slug,
+        # is_published=True
+    )
+
+    LessonProgress.objects.update_or_create(
+        learner=request.user,
+        lesson=lesson,
+        defaults={
+            "is_completed": True,
+            "completed_at": timezone.now(),
+        }
+    )
+
+    messages.success(request, "Lesson completed successfully!")
+
+    return redirect(
+        "courses:lesson",
+        course_slug=course_slug,
+        lesson_slug=lesson_slug
+    )
+
 
 
 # -----------------------------------------
@@ -561,3 +648,61 @@ def vocabulary_delete(request, pk):
         "courses:vocabulary_list",
         lesson_pk=lesson_pk
     )
+
+
+
+
+
+
+
+@login_required
+@content_manager_required
+def instructor_dashboard(request):
+    courses = Course.objects.annotate(
+        total_lessons=Count("lessons")
+    )
+
+    if not request.user.is_superuser and not request.user.is_staff:
+        courses = courses.filter(instructor=request.user)
+
+    context = {
+        "total_courses": courses.count(),
+        "published_courses": courses.filter(is_published=False).count(),
+        "total_lessons": Lesson.objects.filter(
+            course__in=courses
+        ).count(),
+        "total_vocabulary": Vocabulary.objects.filter(
+            lesson__course__in=courses
+        ).count(),
+        "recent_courses": courses.order_by("-created_at")[:5],
+    }
+
+    return render(
+        request,
+        "courses/instructor/dashboard.html",
+        context
+    )
+
+@login_required
+@content_manager_required
+def instructor_courses(request):
+
+    courses = Course.objects.annotate(
+        total_lessons=Count("lessons")
+    )
+
+    if not request.user.is_superuser and not request.user.is_staff:
+        courses = courses.filter(instructor=request.user)
+
+    return render(
+        request,
+        "courses/instructor/course_list.html",
+        {"courses": courses}
+    )
+
+
+
+
+
+
+

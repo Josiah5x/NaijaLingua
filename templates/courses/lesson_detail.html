@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} | NaijaLingua{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb -->
+    <div class="mb-4">
+        <a href="{% url 'courses:detail' course.slug %}"
+           class="text-decoration-none">
+            {{ course.title }}
+        </a>
+        <span class="text-muted"> / {{ lesson.title }}</span>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Main Lesson Area -->
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-primary">
+                            Lesson {{ lesson.lesson_number }}
+                        </span>
+
+                        {% if progress.is_completed %}
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i>
+                                Completed
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <h1 class="fw-bold mb-3">{{ lesson.title }}</h1>
+
+                    <p class="text-muted">
+                        {{ lesson.description }}
+                    </p>
+
+                    <hr>
+
+                    <!-- Lesson Content -->
+                    <div class="lesson-content">
+                        {{ lesson.content|linebreaks }}
+                    </div>
+
+                    <!-- Audio Player -->
+                    {% if lesson.audio %}
+                        <div class="audio-section mt-5">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-volume-up"></i>
+                                Listen to the Lesson
+                            </h5>
+
+                            <audio controls class="w-100">
+                                <source src="{{ lesson.audio.url }}">
+                                Your browser does not support audio playback.
+                            </audio>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- Vocabulary -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+
+                    <h4 class="fw-bold mb-4">
+                        <i class="bi bi-translate"></i>
+                        Vocabulary
+                    </h4>
+
+                    {% for item in vocabulary %}
+                        <div class="vocabulary-item py-3 border-bottom">
+
+                            <div class="row align-items-center g-2">
+
+                                <div class="col-md-5">
+                                    <h5 class="fw-bold mb-1">
+                                        {{ item.word }}
+                                    </h5>
+
+                                    {% if item.pronunciation %}
+                                        <small class="text-muted">
+                                            /{{ item.pronunciation }}/
+                                        </small>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-5">
+                                    <span class="text-muted">
+                                        {{ item.english }}
+                                    </span>
+                                </div>
+
+                                <div class="col-md-2 text-md-end">
+                                    {% if item.audio %}
+                                        <audio controls preload="none">
+                                            <source src="{{ item.audio.url }}">
+                                        </audio>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+
+                            {% if item.example %}
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        Example: {{ item.example }}
+                                    </small>
+                                </div>
+                            {% endif %}
+
+                            {% if item.example_translation %}
+                                <div>
+                                    <small class="text-muted">
+                                        Translation:
+                                        {{ item.example_translation }}
+                                    </small>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">
+                            Vocabulary for this lesson will be added soon.
+                        </p>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+            <!-- Complete Lesson -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+
+                    {% if progress.is_completed %}
+                        <div class="alert alert-success mb-0">
+                            <i class="bi bi-check-circle-fill"></i>
+                            You have completed this lesson.
+                        </div>
+                    {% else %}
+                        <h5 class="fw-bold">Finished this lesson?</h5>
+
+                        <p class="text-muted">
+                            Mark it as completed to track your learning progress.
+                        </p>
+
+                        <form method="POST"
+                              action="{% url 'courses:mark_lesson_complete' course.slug lesson.slug %}">
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i>
+                                Mark as Completed
+                            </button>
+                        </form>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- Previous and Next -->
+            <div class="d-flex justify-content-between gap-3 mb-5">
+
+                {% if previous_lesson %}
+                    <a href="{% url 'courses:lesson' course.slug previous_lesson.slug %}"
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Previous
+                    </a>
+                {% else %}
+                    <span></span>
+                {% endif %}
+
+                {% if next_lesson %}
+                    <a href="{% url 'courses:lesson' course.slug next_lesson.slug %}"
+                       class="btn btn-primary">
+                        Next Lesson
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                {% else %}
+                    <a href="{% url 'courses:detail' course.slug %}"
+                       class="btn btn-outline-primary">
+                        Back to Course
+                    </a>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- Lesson Sidebar -->
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm rounded-4 sticky-top"
+                 style="top: 90px;">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-3">Course Lessons</h5>
+
+                    <div class="list-group list-group-flush">
+
+                        {% for item in lessons %}
+                            <a href="{% url 'courses:lesson' course.slug item.slug %}"
+                               class="list-group-item list-group-item-action
+                               {% if item.id == lesson.id %}active{% endif %}">
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <small class="d-block">
+                                            Lesson {{ item.lesson_number }}
+                                        </small>
+                                        {{ item.title }}
+                                    </span>
+
+                                    {% if item.id == lesson.id %}
+                                        <i class="bi bi-play-circle"></i>
+                                    {% endif %}
+                                </div>
+
+                            </a>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+
+{% extends "base.html" %}
+
+{% block title %}Manage Courses | NaijaLingua{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4 px-lg-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">My Courses</h2>
+            <p class="text-muted mb-0">
+                Create and manage your language courses.
+            </p>
+        </div>
+
+        <a href="{% url 'courses:course_create' %}"
+           class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>
+            Create Course
+        </a>
+    </div>
+
+    <div class="instructor-panel">
+
+        <div class="table-responsive">
+            <table class="table instructor-table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Language</th>
+                        <th>Level</th>
+                        <th>Lessons</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for course in courses %}
+                    <tr>
+                        <td>
+                            <strong>{{ course.title }}</strong>
+                            <small class="d-block text-muted">
+                                {{ course.created_at|date:"d M Y" }}
+                            </small>
+                        </td>
+
+                        <td>{{ course.language.name }}</td>
+
+                        <td>{{ course.get_level_display }}</td>
+
+                        <td>{{ course.lesson_count }}</td>
+
+                        <td>
+                            {% if course.is_published %}
+                                <span class="badge bg-success">Published</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Draft</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm"
+                                        data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{% url 'courses:course_update' course.slug %}">
+                                            Edit Course
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{% url 'courses:manage_lessons' course.slug %}">
+                                            Manage Lessons
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{% url 'courses:detail' course.slug %}">
+                                            Preview Course
+                                        </a>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider"></li>
+
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           href="{% url 'courses:course_delete' course.slug %}">
+                                            Delete Course
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-journal-plus fs-1 text-muted"></i>
+                            <h5 class="mt-3">No courses yet</h5>
+                            <p class="text-muted">
+                                Start by creating your first course.
+                            </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

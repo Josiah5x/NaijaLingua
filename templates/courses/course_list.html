@@ -66,81 +66,59 @@
         <div class="row g-4">
 
             {% for course in courses %}
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-4 mb-4">
+            <div class="course-card">
 
-                <div class="course-card h-100">
-
-                    <div class="course-thumbnail">
-
-                        {% if course.thumbnail %}
-                            <img src="{{ course.thumbnail.url }}"
-                                 alt="{{ course.title }}">
-                        {% else %}
-                            <div class="course-placeholder">
-                                {% if course.language.name|lower == "Mada" %}
-                                    🗣️
-                                {% elif course.language.name|lower == "igbo" %}
-                                    🌿
-                                {% elif course.language.name|lower == "hausa" %}
-                                    🕌
-                                {% else %}
-                                    🌍
-                                {% endif %}
-                            </div>
-                        {% endif %}
-
-                        {% if course.is_premium %}
-                            <span class="premium-badge">
-                                <i class="bi bi-star-fill"></i> Premium
-                            </span>
-                        {% else %}
-                            <span class="free-badge">Free</span>
-                        {% endif %}
-
-                    </div>
-
-                    <div class="course-card-body">
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="language-label">
-                                {{ course.language.name }}
-                            </span>
-
-                            <span class="level-badge">
-                                {{ course.get_level_display }}
-                            </span>
-                        </div>
-
-                        <h4 class="fw-bold">
-                            {{ course.title }}
-                        </h4>
-
-                        <p class="course-description">
-                            {{ course.description|truncatewords:20 }}
-                        </p>
-
-                        <div class="course-meta">
-                            <span>
-                                <i class="bi bi-journal-text"></i>
-                                {{ course.lesson_count }} Lessons
-                            </span>
-
-                            <span>
-                                <i class="bi bi-clock"></i>
-                                Self-paced
-                            </span>
-                        </div>
-
-                        <a href="{% url 'courses:detail' course.slug %}"
-                           class="btn btn-primary w-100 mt-4">
-                            View Course
-                            <i class="bi bi-arrow-right ms-2"></i>
-                        </a>
-
-                    </div>
+        <div class="position-relative">
+            {% if course.thumbnail %}
+                <img src="{{ course.thumbnail.url }}"
+                     class="course-thumbnail"
+                     alt="{{ course.title }}">
+            {% else %}
+                <div class="course-thumbnail-placeholder">
+                    <i class="bi bi-translate"></i>
                 </div>
+            {% endif %}
 
+            {% if course.is_premium %}
+                <span class="premium-badge">PREMIUM</span>
+            {% endif %}
+        </div>
+
+        <div class="card-body">
+
+            <span class="course-level mb-3">
+                {{ course.get_level_display }}
+            </span>
+
+            <h5 class="course-title">{{ course.title }}</h5>
+
+            <p class="course-description">
+                {{ course.description|truncatewords:18 }}
+            </p>
+
+            <div class="course-meta">
+                <span>
+                    <i class="bi bi-globe"></i>
+                    {{ course.language.name }}
+                </span>
+
+                <span>
+                    <i class="bi bi-book"></i>
+                    {{ course.lesson_count }} Lessons
+                </span>
             </div>
+
+            <div class="mt-auto">
+                <a href="{% url 'courses:detail' course.slug %}"
+                   class="btn btn-brand w-100">
+                    Explore Course →
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
 
             {% empty %}
 

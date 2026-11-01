@@ -1,4 +1,5 @@
 
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 
@@ -10,10 +11,20 @@ class Course(models.Model):
         INTERMEDIATE = "INTERMEDIATE", "Intermediate"
         ADVANCED = "ADVANCED", "Advanced"
 
+
+
+    instructor = models.ForeignKey(
+    "accounts.User",
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name="courses"
+    )
+
     language = models.ForeignKey(
-        "languages.Language",
-        on_delete=models.CASCADE,
-        related_name="courses"
+    "languages.Language",
+    on_delete=models.CASCADE,
+    related_name="courses"
     )
 
     title = models.CharField(max_length=200)
@@ -70,7 +81,7 @@ class Course(models.Model):
 
     @property
     def lesson_count(self):
-        return self.lessons.filter(is_published=True).count()
+        return self.lessons.filter(is_published=False).count()
 
 
 
@@ -162,3 +173,38 @@ class Vocabulary(models.Model):
 
     def __str__(self):
         return f"{self.word} - {self.english}"
+
+
+
+
+
+class LessonProgress(models.Model):
+    learner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="lesson_progress"
+    )
+    lesson = models.ForeignKey(
+        "courses.Lesson",
+        on_delete=models.CASCADE,
+        related_name="learner_progress"
+    )
+    is_completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["learner", "lesson"],
+                name="unique_learner_lesson_progress"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.learner} - {self.lesson.title}"
+
+
+
+

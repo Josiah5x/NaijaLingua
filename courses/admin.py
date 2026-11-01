@@ -1,6 +1,6 @@
 
 from django.contrib import admin
-from .models import Course, Lesson, Vocabulary
+from .models import Course, Lesson, Vocabulary,LessonProgress
 
 
 class VocabularyInline(admin.TabularInline):
@@ -80,3 +80,23 @@ class VocabularyAdmin(admin.ModelAdmin):
         "word",
         "english",
     )
+
+
+
+
+@admin.register(LessonProgress)
+class LessonProgressAdmin(admin.ModelAdmin):
+    list_display = (
+        "learner",
+        "lesson",
+        "is_completed",
+        "completed_at",
+        "updated_at",
+    )
+    list_filter = ("is_completed", "lesson__course")
+    search_fields = (
+        "learner__username",
+        "lesson__title",
+        "lesson__course__title",
+    )
+    readonly_fields = ("completed_at", "updated_at")

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account | NaijaLingua{% endblock %}
+
+{% block content %}
+
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-wrapper">
+
+            <div class="auth-intro">
+                <span class="section-eyebrow">
+                    YOUR LANGUAGE JOURNEY STARTS HERE
+                </span>
+
+                <h1>Create your <span>NaijaLingua</span> account.</h1>
+
+                <p>
+                    Learn Nigerian languages, discover new expressions
+                    and connect with culture through interactive lessons.
+                </p>
+
+                <div class="auth-benefits">
+                    <div>✓ Learn at your own pace</div>
+                    <div>✓ Practise with audio and quizzes</div>
+                    <div>✓ Track your learning journey</div>
+                </div>
+            </div>
+
+            <div class="auth-card">
+                <h2>Create an account</h2>
+
+                <p class="auth-subtitle">
+                    Fill in your details to get started.
+                </p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <div class="form-help">
+                                    {{ field.help_text|safe }}
+                                </div>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit"
+                            class="btn btn-brand auth-submit">
+                        Create My Account
+                        <span aria-hidden="true">&rarr;</span>
+                    </button>
+                </form>
+
+                <p class="auth-switch">
+                    Already have an account?
+                    <a href="{% url 'accounts:login' %}">
+                        Log in
+                    </a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

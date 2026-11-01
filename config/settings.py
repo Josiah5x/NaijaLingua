@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # NaijaLingua applications
+    'accounts',
     'core',
     'languages',
     "courses",
@@ -85,6 +86,12 @@ DATABASES = {
     }
 }
 
+EMAIL_BACKEND = (
+    "django.core.mail.backends.console.EmailBackend"
+)
+
+DEFAULT_FROM_EMAIL = "noreply@naijalingua.local"
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -117,6 +124,11 @@ USE_I18N = True
 USE_TZ = True
 
 
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'accounts:dashboard'
+LOGOUT_REDIRECT_URL = 'core:home'
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
@@ -130,3 +142,4 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'accounts.User'

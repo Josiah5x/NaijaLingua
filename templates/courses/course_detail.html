@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} | NaijaLingua{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Course Header -->
+    <div class="row g-4 align-items-center mb-5">
+        <div class="col-lg-7">
+            <span class="badge bg-primary mb-3">
+                {{ course.get_level_display }}
+            </span>
+
+            <h1 class="fw-bold">{{ course.title }}</h1>
+
+            <p class="text-muted">
+                Learn {{ course.language.name }} through practical lessons,
+                vocabulary, pronunciation and exercises.
+            </p>
+
+            <p>{{ course.description }}</p>
+
+            <div class="d-flex flex-wrap gap-3 text-muted mb-4">
+                <span>
+                    <i class="bi bi-book"></i>
+                    {{ lessons.count }} Lessons
+                </span>
+                <span>
+                    <i class="bi bi-globe"></i>
+                    {{ course.language.name }}
+                </span>
+                <span>
+                    <i class="bi bi-bar-chart"></i>
+                    {{ course.get_level_display }}
+                </span>
+            </div>
+
+            {% if lessons %}
+                <a href="{% url 'courses:lesson' course.slug lessons.0.slug %}"
+                   class="btn btn-primary btn-lg">
+                    Start Learning
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-5">
+            {% if course.thumbnail %}
+                <img src="{{ course.thumbnail.url }}"
+                     class="img-fluid rounded-4 shadow"
+                     alt="{{ course.title }}">
+            {% else %}
+                <div class="rounded-4 bg-primary text-white p-5 text-center">
+                    <i class="bi bi-book-half display-1"></i>
+                    <h4 class="mt-3">{{ course.language.name }}</h4>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Lessons -->
+    <div class="mt-5">
+        <h3 class="fw-bold mb-4">Course Lessons</h3>
+
+        {% for lesson in lessons %}
+            <div class="card mb-3 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center justify-content-between gap-3">
+                    <div>
+                        <small class="text-muted">
+                            Lesson {{ lesson.lesson_number }}
+                        </small>
+
+                        <h5 class="mb-1">{{ lesson.title }}</h5>
+
+                        <p class="text-muted mb-0">
+                            {{ lesson.description|truncatewords:15 }}
+                        </p>
+                    </div>
+
+                    <a href="{% url 'courses:lesson' course.slug lesson.slug %}"
+                       class="btn btn-outline-primary">
+                        View Lesson
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info">
+                Lessons for this course will be available soon.
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

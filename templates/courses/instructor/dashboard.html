@@ -1,0 +1,289 @@
+
+{% extends "base.html" %}
+
+{% block title %}Instructor Dashboard | NaijaLingua{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="text-primary fw-semibold small">
+                INSTRUCTOR WORKSPACE
+            </span>
+
+            <h2 class="fw-bold mt-1 mb-1">
+                Welcome, {{ request.user.first_name|default:request.user.username }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                Manage your Nigerian language learning content.
+            </p>
+        </div>
+
+        <a href="{% url 'courses:course_create' %}"
+           class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>
+            Create New Course
+        </a>
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="instructor-stat-card">
+                <div class="stat-icon blue">
+                    <i class="bi bi-journal-bookmark"></i>
+                </div>
+
+                <div>
+                    <p>Total Courses</p>
+                    <h3>{{ total_courses }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="instructor-stat-card">
+                <div class="stat-icon green">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+
+                <div>
+                    <p>Published Courses</p>
+                    <h3>{{ published_courses }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="instructor-stat-card">
+                <div class="stat-icon purple">
+                    <i class="bi bi-collection-play"></i>
+                </div>
+
+                <div>
+                    <p>Total Lessons</p>
+                    <h3>{{ total_lessons }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="instructor-stat-card">
+                <div class="stat-icon orange">
+                    <i class="bi bi-translate"></i>
+                </div>
+
+                <div>
+                    <p>Vocabulary Words</p>
+                    <h3>{{ total_vocabulary }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Quick Actions -->
+    <div class="instructor-panel mb-4">
+
+        <h5 class="fw-bold mb-3">Quick Actions</h5>
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <a href="{% url 'courses:course_create' %}"
+                   class="quick-action">
+                    <i class="bi bi-plus-circle"></i>
+
+                    <div>
+                        <strong>Create Course</strong>
+                        <small>Start a new language course</small>
+                    </div>
+
+                    <i class="bi bi-chevron-right ms-auto"></i>
+                </a>
+            </div>
+
+            <div class="col-md-3">
+                <a href="{% url 'courses:list' %}"
+                   class="quick-action">
+                    <i class="bi bi-book"></i>
+
+                    <div>
+                        <strong>Browse Courses</strong>
+                        <small>View available learning courses</small>
+                    </div>
+
+                    <i class="bi bi-chevron-right ms-auto"></i>
+                </a>
+            </div>
+
+            <div class="col-md-3">
+            <a href="{% url 'courses:instructor_courses' %}"
+            class="quick-action">
+                <i class="bi bi-journal-bookmark"></i>
+
+                <div>
+                    <strong>Manage Courses</strong>
+                    <small>View, edit and organize courses</small>
+                </div>
+
+                <i class="bi bi-chevron-right ms-auto"></i>
+            </a>
+            </div>
+
+            <div class="col-md-3">
+                <a href="{% url 'accounts:dashboard' %}"
+                   class="quick-action">
+                    <i class="bi bi-person-circle"></i>
+
+                    <div>
+                        <strong>My Account</strong>
+                        <small>Return to your learner dashboard</small>
+                    </div>
+
+                    <i class="bi bi-chevron-right ms-auto"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Recent Courses -->
+    <div class="instructor-panel">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="fw-bold mb-1">Course Management</h5>
+                <p class="text-muted small mb-0">
+                    Manage your existing learning courses.
+                </p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle instructor-table">
+
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Language</th>
+                        <th>Level</th>
+                        <th>Lessons</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for course in recent_courses %}
+
+                    <tr>
+
+                        <td>
+                            <strong>{{ course.title }}</strong>
+                            <small class="d-block text-muted">
+                                {{ course.created_at|date:"d M Y" }}
+                            </small>
+                        </td>
+
+                        <td>{{ course.language.name }}</td>
+
+                        <td>
+                            <span class="badge bg-light text-dark">
+                                {{ course.get_level_display }}
+                            </span>
+                        </td>
+
+                        <td>{{ course.total_lessons }}</td>
+
+                        <td>
+                            {% if course.is_published %}
+                                <span class="badge bg-success-subtle text-success">
+                                    Published
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary">
+                                    Draft
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light"
+                                        data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{% url 'courses:course_update' course.slug %}">
+                                            <i class="bi bi-pencil me-2"></i>
+                                            Edit Course
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{% url 'courses:manage_lessons' course.slug %}">
+                                            <i class="bi bi-collection me-2"></i>
+                                            Manage Lessons
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{% url 'courses:detail' course.slug %}">
+                                            <i class="bi bi-eye me-2"></i>
+                                            View Course
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-journal-plus fs-1 text-muted"></i>
+
+                            <h6 class="mt-3">No courses created yet</h6>
+
+                            <p class="text-muted">
+                                Create your first Nigerian language course.
+                            </p>
+
+                            <a href="{% url 'courses:course_create' %}"
+                               class="btn btn-primary btn-sm">
+                                Create First Course
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
